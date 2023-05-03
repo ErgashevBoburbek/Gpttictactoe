@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>'X'lar va 'O'lar</title>
+  <style>
+    #body {
+      display: flex;
+      justify-content: center;
+      width: 100vw;
+      height: 100vh;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      font-size: 34px;
+    }
+    
+    #gridcontainer {
+      display: flex;
+      border: 2px solid lime;
+      flex-wrap: wrap;
+      width: 162px;
+      height: 162px;
+      align-self: center;
+      border-radius: 10px;
+    }
+    
+    .grids {
+      border: 2px solid blue;
+      border-radius: 10px;
+      margin: 5px;
+      width: 40px;
+      height: 40px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body id="body">
+  <div id="gridcontainer">
+    <span class="grids" id="grid1"> </span>
+    <span class="grids" id="grid2"> </span>
+    <span class="grids" id="grid3"> </span>
+    <span class="grids" id="grid4"> </span>
+    <span class="grids" id="grid5"> </span>
+    <span class="grids" id="grid6"> </span>
+    <span class="grids" id="grid7"> </span>
+    <span class="grids" id="grid8"> </span>
+    <span class="grids" id="grid9"> </span>
+  </div>
+  <script>
+     const grids = document.querySelectorAll('.grids');
+const player1 = 'X';
+const player2 = 'O';
+let currentPlayer = player1;
+let gameStatus = '';
+let gameBoard = ['', '', '', '', '', '', '', '', ''];
+
+function handleClick(event) {
+  const gridIndex = event.target.id.slice(4) - 1;
+  
+  if (gameBoard[gridIndex] !== '') {
+    return;
+  }
+  
+  gameBoard[gridIndex] = currentPlayer;
+  event.target.textContent = currentPlayer;
+  
+  gameStatus = checkWin();
+  if (gameStatus !== '') {
+    alert(`Player ${currentPlayer} wins!`);
+    resetGame();
+    return;
+  }
+  
+  if (!gameBoard.includes('')) {
+    alert('Tie game!');
+    resetGame();
+    return;
+  }
+  
+  currentPlayer = currentPlayer === player1 ? player2 : player1;
+  if (currentPlayer === player2) {
+    setTimeout(() => {
+      const botMoveIndex = getBotMove();
+      const botMoveElement = document.getElementById(`grid${botMoveIndex+1}`);
+      botMoveElement.click();
+    }, 1000);
+  }
+}
+
+function checkWin() {
+  const winConditions = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+  
+  for (let i = 0; i < winConditions.length; i++) {
+    const [a, b, c] = winConditions[i];
+    if (gameBoard[a] !== '' && gameBoard[a] === gameBoard[b] && gameBoard[b] === gameBoard[c]) {
+      return gameBoard[a];
+    }
+  }
+  
+  return '';
+}
+
+function resetGame() {
+  gameBoard = ['', '', '', '', '', '', '', '', ''];
+  grids.forEach(grid => grid.textContent = '');
+  currentPlayer = player1;
+}
+
+function getBotMove() {
+  // If bot can win, choose winning move
+  for (let i = 0; i < 9; i++) {
+    if (gameBoard[i] === '') {
+      gameBoard[i] = player2;
+      if (checkWin() === player2) {
+        gameBoard[i] = '';
+        return i;
+      }
+      gameBoard[i] = '';
+    }
+  }
+
+  // If player can win, block winning move
+  for (let i = 0; i < 9; i++) {
+    if (gameBoard[i] === '') {
+      gameBoard[i] = player1;
+      if (checkWin() === player1) {
+        gameBoard[i] = '';
+        return i;
+      }
+      gameBoard[i] = '';
+    }
+  }
+
+  // Choose random move
+  const emptyIndices = [];
+  for (let i = 0; i < 9; i++) {
+    if (gameBoard[i] === '') {
+      emptyIndices.push(i);
+    }
+  }
+  const randomIndex = Math.floor(Math.random() * emptyIndices.length);
+  return emptyIndices[randomIndex];
+}
+
+grids.forEach(grid => grid.addEventListener('click', handleClick));
+
+  </script>
+ </body>
+</html>
